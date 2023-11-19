@@ -1,10 +1,3 @@
-function sendHeightToParent() {
-	const currentHostname = window.location.hostname;
-	var bodyHeight = document.body.scrollHeight;
-	var message = { type: 'iframeHeight', height: bodyHeight };
-	window.parent.postMessage(JSON.stringify(message), 'https://' + currentHostname);
-}
-
 function getInputByLabel(options) {
 	const {labelText = '',
 	debug = false} = options;
@@ -27,7 +20,7 @@ function getInputByLabel(options) {
 function getValueByLabel(options) {
 	const {labelText = '',
 	debug = false} = options;
-	var labelText = options.labelText;
+	var inputField = getInputByLabel(options);
 	return inputField.value;
 }
 
@@ -140,14 +133,6 @@ function initiateNestedSyncing(options) {
 	} catch (error) {
 		console.error('Error handling:', error);
 	}
-}
-
-function initiateSendHeightToParent() {
-	// Call the function initially and whenever the content changes
-	sendHeightToParent();
-
-	// Add event listeners for any other events that might trigger a resize
-	window.addEventListener('resize', sendHeightToParent);		
 }
 
 function hideFields(fieldLabels) {
