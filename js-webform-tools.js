@@ -328,9 +328,9 @@ function disableAutocomplete() {
     inputElements.forEach(input => {
         input.setAttribute('autocomplete', 'off');
         input.setAttribute('data-lpignore', 'true');
-		input.readOnly = true;
-		input.onfocus = function(){this.removeAttribute('readonly');};
-		input.onblur = function(){this.setAttribute('readonly', true);};
+//		input.readOnly = true;
+//		input.onfocus = function(){this.removeAttribute('readonly');};
+//		input.onblur = function(){this.setAttribute('readonly', true);};
 		
     });
 }
