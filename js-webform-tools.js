@@ -1,9 +1,38 @@
-console.log('Loading js-webform-tools.js');
 function sendHeightToParent() {
 	const currentHostname = window.location.hostname;
 	var bodyHeight = document.body.scrollHeight;
 	var message = { type: 'iframeHeight', height: bodyHeight };
 	window.parent.postMessage(JSON.stringify(message), 'https://' + currentHostname);
+}
+
+function getInputByLabel(options) {
+	const {labelText = '',
+	debug = false} = options;
+	labelText = options.labelText;
+	debug = options.debug;
+	var label = Array.from(document.querySelectorAll(`div > label`)).find((l) => l.textContent === labelText);
+
+	if (debug) {console.log('Looking for label ' + labelText)};		
+	if (label) {
+		var inputId = label.getAttribute('for');
+		var inputField = document.getElementById(inputId);
+		if (inputField) {
+			return inputField;
+		} else {
+		if (debug) {console.log('Input element not found for label:', labelText)};
+		}
+	} else {
+		if (debug) {console.log('Label not found:', labelText)};
+	}
+}
+
+function getValueByLabel(options) {
+	const {labelText = '',
+	debug = false} = options;
+	labelText = options.labelText;
+	debug = options.debug;
+	var inputField = getInputByLabel(options);
+	return inputField.value;
 }
 
 function initiateNestedSyncing(options) {
@@ -140,4 +169,21 @@ function hideFields(fieldLabels) {
 	} catch (error) {
 	    console.error('Error handling:', error);
     }
+}
+
+// Function to load a script from a given URL
+function loadScript(url) {
+	return new Promise((resolve, reject) => {
+		const script = document.createElement('script');
+		script.src = url;
+		script.onload = () => {
+			console.log('Script loaded successfully: ' + url);
+			resolve();
+		};
+		script.onerror = () => {
+			console.error('Script failed to load: ' + url);
+			reject();
+		};
+		document.head.appendChild(script);
+	});
 }
