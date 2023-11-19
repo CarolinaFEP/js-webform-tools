@@ -282,7 +282,7 @@ function initiateNestedSyncing(options) {
 function hideFields(fieldLabels) {
 	try {
 		fieldLabels.forEach(function(labelText) {
-			var inputField = getInputByLabel({debug: debug,labelText: labelText});
+			var inputField = getInputByLabel({labelText: labelText});
 			if (inputField) {
 				inputField.parentNode.parentNode.parentNode.style.display = 'none';
 			}
