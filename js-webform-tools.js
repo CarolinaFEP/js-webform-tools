@@ -8,8 +8,6 @@ function sendHeightToParent() {
 function getInputByLabel(options) {
 	const {labelText = '',
 	debug = false} = options;
-	var labelText = options.labelText;
-	var debug = options.debug;
 	var label = Array.from(document.querySelectorAll(`div > label`)).find((l) => l.textContent === labelText);
 
 	if (debug) {console.log('Looking for label ' + labelText)};		
@@ -30,8 +28,6 @@ function getValueByLabel(options) {
 	const {labelText = '',
 	debug = false} = options;
 	var labelText = options.labelText;
-	var debug = options.debug;
-	var inputField = getInputByLabel(options);
 	return inputField.value;
 }
 
