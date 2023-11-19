@@ -6,7 +6,9 @@ function sendHeightToParent() {
 }
 
 function initiateNestedSyncing(options) {
-	const { debug = false, fieldLabels = ['• First name', 'Last name', 'What does the caller need?'], syncBack = ['• First name', 'Last name'] } = options;
+	const { debug : false, 
+	fieldLabels : ['• First name', 'Last name', 'What does the caller need?'], 
+	syncBack : ['• First name', 'Last name'] } = options;
 	const currentHostname = window.location.hostname;
 
 	// Set up event listener to send changes from Form A (parent container) to Form B (nested child)
