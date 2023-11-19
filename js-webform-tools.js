@@ -317,8 +317,30 @@ function disableAutocomplete() {
     inputElements.forEach(input => {
         input.setAttribute('autocomplete', 'off');
         input.setAttribute('data-lpignore', 'true');
+		inputField.readOnly = true;
+		inputField.onfocus = function(){this.removeAttribute('readonly');};
+		inputField.onblur = function(){this.setAttribute('readonly', true);};
+		
     });
 }
 
-// Call the function to disable autocomplete for all inputs
-disableAutocomplete();
+function removeSubmitButton() {
+	// Select all buttons
+	var buttons = document.querySelectorAll('button');
+		var fieldLabels = ['• First name', 'Last name', 'What does the caller need?'];
+	// Iterate through each button
+	buttons.forEach(function(button) {
+		// Check if the button contains a div
+		var div = button.querySelector('div');
+
+		if (div) {
+			// Check if the div contains a span with the text Submit
+			var span = div.querySelector('span');
+
+			if (span && span.textContent.trim() === 'Submit') {
+				// Remove the button
+				button.remove();
+			}
+		}
+	});
+}
