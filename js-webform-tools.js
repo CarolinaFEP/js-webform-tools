@@ -183,6 +183,15 @@ function getFormALabels(labels) {
     return formALabels;
 }
 
+function isValidJSON(str) {
+    try {
+        JSON.parse(str);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
 function initiateNestedSyncing(options) {
 	const { debug = false, 
 	labels = [{'formB' : 'Form First Name','formA' : 'First Name'},{'formB' : 'Form Last Name','formA' : 'Last Name'},{'formB' : 'What does the caller need?','formA' : 'What does the caller need?'}],
@@ -195,7 +204,9 @@ function initiateNestedSyncing(options) {
 		window.addEventListener('message', function (event) {
 			if (event.origin === 'https://' + currentHostname) {
 				var receivedMessage = event.data;
-
+				if(!isValidJSON(receivedMessage)) {
+					return;
+				}
 				try {
 					// Parse the received message as JSON
 					var jsonMessage = JSON.parse(receivedMessage);
@@ -211,7 +222,7 @@ function initiateNestedSyncing(options) {
 						if (debug) {console.log('Frame B found label: ' + labelText)};
 						var inputValue = inputField.value;
 						if(inputValue != jsonMessage[labelText]) {
-							document.getElementById(inputId).value = jsonMessage[labelText];
+							inputField.value = jsonMessage[labelText];
 							if (debug) {console.log('Frame B just filled in the field: ' + jsonMessage.value)};
 						}
 					} else {
