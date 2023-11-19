@@ -1,4 +1,5 @@
 function sendHeightToParent() {
+	const currentHostname = window.location.hostname;
 	var bodyHeight = document.body.scrollHeight;
 	var message = { type: 'iframeHeight', height: bodyHeight };
 	window.parent.postMessage(JSON.stringify(message), 'https://' + currentHostname);
