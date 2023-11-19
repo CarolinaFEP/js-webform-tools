@@ -355,3 +355,42 @@ function removeSubmitButton() {
 		}
 	});
 }
+
+function buildQueryString(json) {
+    return Object.keys(json)
+        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(json[key])}`)
+        .join('&');
+}
+
+function buildQueryStringByLabels(labels) {
+    var json = {}
+	for (const label of labels) {
+		var inputValue = getInputValueByLabel({'labelText':label});
+        if (inputValue) {
+            json[label] = inputValue;
+        }
+    }
+	return buildQueryString(json);
+}
+
+function parseQueryString() {
+		const queryString = window.location.search.substring(1);
+		const params = new URLSearchParams(queryString);
+		const result = {};
+
+		for (const [key, value] of params) {
+			result[key] = decodeURIComponent(value);
+		}
+
+		return result;
+}
+
+function populateValuesFromQueryString(labels) {
+	var parsedParams = parseQueryString();
+	for (const label of labels) {
+	    if(parsedParams.hasOwnProperty(label) && parsedParams[label]) {	     
+			getInputByLabel({labelText: label}).value = parsedParams[label];
+		}
+	}
+}
+
