@@ -59,10 +59,134 @@ function getInputValueByLabel(options) {
 	return inputField.value;
 }
 
+function getFormBLabelByFormALabel(formALabel, labels) {
+    // Assuming [fields] is defined in the global scope
+    for (const label of labels) {
+        if (label.formA === formALabel) {
+            return label.formB;
+        }
+    }
+    // Return null if no match is found
+    return null;
+}
+
+function getFormALabelByFormBLabel(formBLabel, labels) {
+    // Assuming [fields] is defined in the global scope
+    for (const label of labels) {
+        if (label.formB === formBLabel) {
+            return label.formA;
+        }
+    }
+    // Return null if no match is found
+    return null;
+}
+
+function initiateContainerSyncing(options) {
+	const { debug = false
+	} = options;
+	const currentHostname = window.location.hostname;
+	try {
+        var iframeB = document.getElementById('iframeB');
+        var fieldLabels = []; // Initialize an empty array to store field labels
+
+        if (iframeB) {
+			if (debug) {console.log('Setting up an event listener on form a')};
+            window.addEventListener('message', function (event) {
+                if (event.origin === 'https://' + currentHostname) {
+                    var receivedMessage = event.data;
+                    try {
+                        // Parse the received message as JSON
+                        var jsonMessage = JSON.parse(receivedMessage);
+
+                        // Check for a specific key in the JSON message
+					    // if fieldLabels, this is a subscription operation
+                        if (jsonMessage && jsonMessage.fieldLabels) {
+                            if (debug) {console.log};('Received field labels from Form B:', jsonMessage.fieldLabels);
+
+                            // Update fieldLabels array with the received labels
+                            fieldLabels = jsonMessage.fieldLabels;
+
+                            // Setup input change events based on the received labels
+                            fieldLabels.forEach(function(labelText) {
+								var inputField = getInputByLabel({debug: debug,labelText: labelText});
+								if (inputField) {
+									var responseData = {
+											hasFormAField: true,
+											labelText: labelText,
+											inputFieldValue: inputField.value
+									};
+									responseData[labelText] = inputField.value;
+									if (debug) {console.log};('Input field changed. Sending message to Form B:', responseData);
+									iframeB.contentWindow.postMessage(JSON.stringify(responseData), 'https://' + currentHostname);
+										
+									inputField.addEventListener('change', function handleInput() {
+                                            // Respond to Form B with a JSON message when input changes
+										var responseData = {
+										hasFormAField: true,
+										labelText: labelText,
+										inputFieldValue: inputField.value
+									};
+									responseData[labelText] = inputField.value;
+									if (debug) {console.log};('Input field changed. Sending message to Form B:', responseData);
+									try {
+										iframeB.contentWindow.postMessage(JSON.stringify(responseData), 'https://' + currentHostname);
+									} catch (error) {
+										inputField.removeEventListener('input', handleInput);
+									}
+									});
+								} else {
+									if (debug) {console.log};('Input element not found for label:', labelText);
+								}
+							});
+                        } else if (jsonMessage && jsonMessage.hasFormBField) {
+							if (debug) {console.log('Received valid JSON message from Form A:', jsonMessage)};
+
+							// Extract the data from the JSON message
+							var labelText = jsonMessage.labelText;
+
+							var inputField = getInputByLabel({debug: debug,labelText: labelText});
+
+							if (inputField) {
+								var inputValue = inputField.value;
+								if (debug) {console.log('Frame B found label: ' + labelText)};
+	
+								if(inputValue != jsonMessage[labelText]) {
+									document.getElementById(inputId).value = jsonMessage[labelText];
+									if (debug) {console.log('Frame A just filled in the field: ' + jsonMessage.value)};
+								}
+							}
+						} else {
+                            // Handle other messages from Form B
+                        }
+                    } catch (error) {
+                        if (debug) {console.log};('Error parsing JSON:', error);
+                    }
+                }
+            }); // event listener
+        } else {
+            console.error('iframeB not found.');
+        }
+    } catch (error) {
+        console.error('Error handling:', error);
+    }
+}
+
+function getFormALabels(labels) {
+    // Assuming [fields] is defined in the global scope
+    const formALabels = [];
+
+    for (const label of labels) {
+        if (label.formA && !formALabels.includes(label.formA)) {
+            formALabels.push(label.formA);
+        }
+    }
+    return formALabels;
+}
+
 function initiateNestedSyncing(options) {
 	const { debug = false, 
-	fieldLabels = ['• First name', 'Last name', 'What does the caller need?'], 
-	syncBack = ['• First name', 'Last name'] } = options;
+	labels = [{'formB' : 'Form First Name','formA' : 'First Name'},{'formB' : 'Form Last Name','formA' : 'Last Name'},{'formB' : 'What does the caller need?','formA' : 'What does the caller need?'}],
+	syncBack = ['First name', 'Last name'] } = options;
 	const currentHostname = window.location.hostname;
 
 	// Set up event listener to send changes from Form A (parent container) to Form B (nested child)
@@ -81,7 +205,8 @@ function initiateNestedSyncing(options) {
 						if (debug) {console.log('Received valid JSON message from Form A:', jsonMessage)};
 
 						// Extract the data from the JSON message
-						var labelText = jsonMessage.labelText;
+						var formALabel = jsonMessage.labelText;
+						var labelText = getFormBLabelByFormALabel(formALabel, labels);
 						var inputField = getInputByLabel({debug: debug,labelText: labelText});
 						if (debug) {console.log('Frame B found label: ' + labelText)};
 						var inputValue = inputField.value;
@@ -108,9 +233,10 @@ function initiateNestedSyncing(options) {
 			var inputField = getInputByLabel({debug: debug,labelText: labelText});
 			if (inputField) {
 				if(inputField.value) {
+					var formALabel = getFormALabelByFormBLabel(labelText, labels);
 					var responseData = {
 							hasFormBField: true,
-							labelText: labelText,
+							labelText: formALabel,
 							inputFieldValue: inputField.value
 						};
 						responseData[labelText] = inputField.value;
@@ -119,9 +245,10 @@ function initiateNestedSyncing(options) {
 				}
 				inputField.addEventListener('change', function handleInput() {
 					// Respond to Form B with a JSON message when input changes
+					var formALabel = getFormALabelByFormBLabel(labelText, labels);
 					var responseData = {
 						hasFormBField: true,
-						labelText: labelText,
+						labelText: formALabel,
 						inputFieldValue: inputField.value
 					};
 					responseData[labelText] = inputField.value;
@@ -142,15 +269,11 @@ function initiateNestedSyncing(options) {
 
 	// Send an initial message to Form A on load
 	try {
-		function sendMessageToFormA() {
-
-			var request = {
-				'fieldLabels': fieldLabels
-			};
-			window.parent.postMessage(JSON.stringify(request), 'https://' + currentHostname);
-			if (debug) {console.log('Frame B: Message sent on load: ' + JSON.stringify(request))};
-		}
-		sendMessageToFormA();        
+		var request = {
+			'fieldLabels': getFormALabels(labels)
+		};
+		window.parent.postMessage(JSON.stringify(request), 'https://' + currentHostname);
+		if (debug) {console.log('Frame B: Message sent on load: ' + JSON.stringify(request))};
 	} catch (error) {
 		console.error('Error handling:', error);
 	}
@@ -185,3 +308,17 @@ function loadScript(url) {
 		document.head.appendChild(script);
 	});
 }
+
+function disableAutocomplete() {
+    // Get all input elements on the page
+    const inputElements = document.querySelectorAll('input');
+
+    // Loop through each input element and set autocomplete to off and add data-lpignore attribute
+    inputElements.forEach(input => {
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('data-lpignore', 'true');
+    });
+}
+
+// Call the function to disable autocomplete for all inputs
+disableAutocomplete();
