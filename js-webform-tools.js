@@ -33,6 +33,12 @@ function getSelectValueByLabel(options) {
 	if (debug) {console.log('Label not found:', labelText)};
 }
 
+function setFieldValue(field, value) {
+	field.focus()
+	document.execCommand('selectAll',false,null)
+	document.execCommand('insertText',false,value)
+}
+
 function getInputByLabel(options) {
 	const {labelText = '',
 	debug = false} = options;
@@ -151,7 +157,7 @@ function initiateContainerSyncing(options) {
 								if (debug) {console.log('Frame B found label: ' + labelText)};
 	
 								if(inputValue != jsonMessage[labelText]) {
-									document.getElementById(inputId).value = jsonMessage[labelText];
+									setFieldValue(inputField, jsonMessage[labelText]);
 									if (debug) {console.log('Frame A just filled in the field: ' + jsonMessage.value)};
 								}
 							}
@@ -222,7 +228,7 @@ function initiateNestedSyncing(options) {
 						if (debug) {console.log('Frame B found label: ' + labelText)};
 						var inputValue = inputField.value;
 						if(inputValue != jsonMessage[labelText]) {
-							inputField.value = jsonMessage[labelText];
+							setFieldValue(inputField, jsonMessage[labelText]);
 							if (debug) {console.log('Frame B just filled in the field: ' + jsonMessage.value)};
 						}
 					} else {
@@ -387,10 +393,13 @@ function parseQueryString() {
 
 function populateValuesFromQueryString(labels) {
 	var parsedParams = parseQueryString();
+	var interactFieldId = 0;
+	var newEvent = new Event('input', { bubbles: true });
+	var changeEvent = new Event('change', { bubbles: true });
 	for (const label of labels) {
-	    if(parsedParams.hasOwnProperty(label) && parsedParams[label]) {	     
-			getInputByLabel({labelText: label}).value = parsedParams[label];
+	    if (parsedParams.hasOwnProperty(label) && parsedParams[label]) {	     
+			var inputField = getInputByLabel({labelText: label});
+			setFieldValue(inputField, parsedParams[label]);
 		}
 	}
 }
-
