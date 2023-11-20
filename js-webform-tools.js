@@ -1,18 +1,3 @@
-var lastFocusedElement = null;
-
-// Function to create a listener that stores the most recently focused element
-function createFocusListener() {
-    document.addEventListener('focus', function (event) {
-        // Update the last focused element on focus
-        lastFocusedElement = event.target;
-    }, true); // The useCapture parameter is set to true for capturing the event during the capturing phase
-
-}
-
-// Function to get the previous focus
-function getPreviousFocus() {
-    return lastFocusedElement;
-}
 
 function getSelectValueByLabel(options) {
 	const {labelText = '',
@@ -181,7 +166,8 @@ function initiateContainerSyncing(options) {
 								if (debug) {console.log('Frame A found label: ' + labelText)};
 							    if (debug) {console.log('Current value is: ' + inputValue + ' versus: ' + jsonMessage.inputFieldValue)};
 								if(inputValue != jsonMessage.inputFieldValue) {
-									setFieldValue(inputField, jsonMessage.inputFieldValue);
+									inputField.value = jsonMessage.inputFieldValue;
+									//setFieldValue(inputField, jsonMessage.inputFieldValue);
 									if (debug) {console.log('Frame A just filled in the field: ' + jsonMessage.value)};
 								}
 							}
