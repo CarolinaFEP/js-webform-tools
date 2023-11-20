@@ -1,3 +1,19 @@
+var lastFocusedElement = null;
+
+// Function to create a listener that stores the most recently focused element
+function createFocusListener() {
+    document.addEventListener('focus', function (event) {
+        // Update the last focused element on focus
+        lastFocusedElement = event.target;
+    }, true); // The useCapture parameter is set to true for capturing the event during the capturing phase
+
+}
+
+// Function to get the previous focus
+function getPreviousFocus() {
+    return lastFocusedElement;
+}
+
 function getSelectValueByLabel(options) {
 	const {labelText = '',
 	debug = false} = options;
@@ -34,9 +50,17 @@ function getSelectValueByLabel(options) {
 }
 
 function setFieldValue(field, value) {
+	var previousFocus = getPreviousFocus();
+	var focused = (document.activeElement == previousFocus);
 	field.focus()
 	document.execCommand('selectAll',false,null)
 	document.execCommand('insertText',false,value)
+	if (previousFocus) {
+		previousFocus.focus();
+		if(!focused) {
+			previousFocus.blur();
+		}
+	}
 }
 
 function getInputByLabel(options) {
@@ -157,11 +181,8 @@ function initiateContainerSyncing(options) {
 								if (debug) {console.log('Frame A found label: ' + labelText)};
 							    if (debug) {console.log('Current value is: ' + inputValue + ' versus: ' + jsonMessage.inputFieldValue)};
 								if(inputValue != jsonMessage.inputFieldValue) {
-									// Get and store the current scroll position
-									var previousScrollPosition = window.scrollY || window.pageYOffset;
 									setFieldValue(inputField, jsonMessage.inputFieldValue);
 									if (debug) {console.log('Frame A just filled in the field: ' + jsonMessage.value)};
-									window.scrollTo(0, previousScrollPosition);
 								}
 							}
 						} else {
