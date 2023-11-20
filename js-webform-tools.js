@@ -34,9 +34,11 @@ function getSelectValueByLabel(options) {
 }
 
 function setFieldValue(field, value) {
+	var previousFocus = document.activeElement;
 	field.focus()
 	document.execCommand('selectAll',false,null)
 	document.execCommand('insertText',false,value)
+	previousFocus.focus()
 }
 
 function getInputByLabel(options) {
