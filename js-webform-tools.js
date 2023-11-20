@@ -34,11 +34,9 @@ function getSelectValueByLabel(options) {
 }
 
 function setFieldValue(field, value) {
-	var previousFocus = document.activeElement;
 	field.focus()
 	document.execCommand('selectAll',false,null)
 	document.execCommand('insertText',false,value)
-	previousFocus.focus()
 }
 
 function getInputByLabel(options) {
@@ -159,8 +157,11 @@ function initiateContainerSyncing(options) {
 								if (debug) {console.log('Frame A found label: ' + labelText)};
 							    if (debug) {console.log('Current value is: ' + inputValue + ' versus: ' + jsonMessage.inputFieldValue)};
 								if(inputValue != jsonMessage.inputFieldValue) {
+									// Get and store the current scroll position
+									var previousScrollPosition = window.scrollY || window.pageYOffset;
 									setFieldValue(inputField, jsonMessage.inputFieldValue);
 									if (debug) {console.log('Frame A just filled in the field: ' + jsonMessage.value)};
+									window.scrollTo(0, previousScrollPosition);
 								}
 							}
 						} else {
