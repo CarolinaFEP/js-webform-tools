@@ -159,7 +159,7 @@ function initiateContainerSyncing(options) {
 								if (debug) {console.log('Frame A found label: ' + labelText)};
 							    if (debug) {console.log('Current value is: ' + inputValue + ' versus: ' + jsonMessage.inputFieldValue)};
 								if(inputValue != jsonMessage.inputFieldValue) {
-									var previousFocus = iframeB.contentDocument.activeElement.focus();
+									var previousFocus = iframeB.contentDocument.activeElement;
 									setFieldValue(inputField, jsonMessage.inputFieldValue);
 									previousFocus.focus();
 									if (debug) {console.log('Frame A just filled in the field: ' + jsonMessage.value)};
