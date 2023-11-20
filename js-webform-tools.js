@@ -123,7 +123,6 @@ function initiateContainerSyncing(options) {
 											labelText: labelText,
 											inputFieldValue: inputField.value
 									};
-									responseData[labelText] = inputField.value;
 									if (debug) {console.log};('Input field changed. Sending message to Form B:', responseData);
 									iframeB.contentWindow.postMessage(JSON.stringify(responseData), 'https://' + currentHostname);
 										
@@ -134,7 +133,6 @@ function initiateContainerSyncing(options) {
 										labelText: labelText,
 										inputFieldValue: inputField.value
 									};
-									responseData[labelText] = inputField.value;
 									if (debug) {console.log};('Input field changed. Sending message to Form B:', responseData);
 									try {
 										iframeB.contentWindow.postMessage(JSON.stringify(responseData), 'https://' + currentHostname);
@@ -231,9 +229,9 @@ function initiateNestedSyncing(options) {
 						var inputField = getInputByLabel({debug: debug,labelText: labelText});
 						if (debug) {console.log('Frame B found label: ' + labelText)};
 						var inputValue = inputField.value;
-						if(inputValue != jsonMessage[labelText]) {
-							setFieldValue(inputField, jsonMessage[labelText]);
-							if (debug) {console.log('Frame B just filled in the field: ' + jsonMessage.value)};
+						if(inputValue != jsonMessage.inputFieldValue) {
+							setFieldValue(inputField, jsonMessage.inputFieldValue);
+							if (debug) {console.log('Frame B just filled in the field: ' + jsonMessage.inputFieldValue)};
 						}
 					} else {
 						// if (debug) {console.log('Ignoring message:', receivedMessage)};
@@ -260,7 +258,6 @@ function initiateNestedSyncing(options) {
 							labelText: formALabel,
 							inputFieldValue: inputField.value
 						};
-						responseData[labelText] = inputField.value;
 						if (debug) {console.log('Input field changed. Sending message to Form A:', responseData)};
 						window.parent.postMessage(JSON.stringify(responseData), 'https://' + currentHostname);
 				}
@@ -272,7 +269,6 @@ function initiateNestedSyncing(options) {
 						labelText: formALabel,
 						inputFieldValue: inputField.value
 					};
-					responseData[labelText] = inputField.value;
 					if (debug) {console.log('Input field changed. Sending message to Form A:', responseData)};
 					try {
 						window.parent.postMessage(JSON.stringify(responseData), 'https://' + currentHostname);
