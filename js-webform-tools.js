@@ -154,10 +154,10 @@ function initiateContainerSyncing(options) {
 
 							if (inputField) {
 								var inputValue = inputField.value;
-								if (debug) {console.log('Frame B found label: ' + labelText)};
-	
-								if(inputValue != jsonMessage[labelText]) {
-									setFieldValue(inputField, jsonMessage[labelText]);
+								if (debug) {console.log('Frame A found label: ' + labelText)};
+							    if (debug) {console.log('Current value is: ' + inputValue + ' versus: ' + jsonMessage.inputFieldValue)};
+								if(inputValue != jsonMessage.inputFieldValue) {
+									setFieldValue(inputField, jsonMessage.inputFieldValue);
 									if (debug) {console.log('Frame A just filled in the field: ' + jsonMessage.value)};
 								}
 							}
