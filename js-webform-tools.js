@@ -123,7 +123,7 @@ function initiateContainerSyncing(options) {
 											labelText: labelText,
 											inputFieldValue: inputField.value
 									};
-									if (debug) {console.log};('Input field changed. Sending message to Form B:', responseData);
+									if (debug) {console.log};('Input field initialization. Sending message to Form B:', responseData);
 									iframeB.contentWindow.postMessage(JSON.stringify(responseData), 'https://' + currentHostname);
 										
 									inputField.addEventListener('change', function handleInput() {
@@ -203,7 +203,8 @@ function isValidJSON(str) {
 function initiateNestedSyncing(options) {
 	const { debug = false, 
 	labels = [{'formB' : 'Form First Name','formA' : 'First Name'},{'formB' : 'Form Last Name','formA' : 'Last Name'},{'formB' : 'What does the caller need?','formA' : 'What does the caller need?'}],
-	syncBack = ['First name', 'Last name'] } = options;
+	syncBack = ['First name', 'Last name'],
+	pushBeforePull = true} = options;
 	const currentHostname = window.location.hostname;
 
 	// Set up event listener to send changes from Form A (parent container) to Form B (nested child)
@@ -249,9 +250,9 @@ function initiateNestedSyncing(options) {
 	try{
 	   if (debug) {console.log('Setting up field listeners on Form B')};		
 	   syncBack.forEach(function(labelText) {
-			var inputField = getInputByLabel({debug: debug,labelText: labelText});
+			var inputField = getInputByLabel({debug: debug,labelText: labelText});			
 			if (inputField) {
-				if(inputField.value) {
+				if(pushBeforePull && inputField.value) {
 					var formALabel = getFormALabelByFormBLabel(labelText, labels);
 					var responseData = {
 							hasFormBField: true,
