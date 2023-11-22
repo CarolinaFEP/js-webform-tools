@@ -218,7 +218,7 @@ function initiateNestedSyncing(options) {
 	const { debug = false, 
 	labels = [{'formB' : 'Form First Name','formA' : 'First Name'},{'formB' : 'Form Last Name','formA' : 'Last Name'},{'formB' : 'What does the caller need?','formA' : 'What does the caller need?'}],
 	syncBack = ['First name', 'Last name'],
-	pushBeforePull = true} = options;
+	pushBeforePull = labels.map(item => item.formB)} = options;
 	const currentHostname = window.location.hostname;
 
 	// Set up event listener to send changes from Form A (parent container) to Form B (nested child)
@@ -266,7 +266,7 @@ function initiateNestedSyncing(options) {
 	   syncBack.forEach(function(labelText) {
 			var inputField = getInputByLabel({debug: debug,labelText: labelText});			
 			if (inputField) {
-				if(pushBeforePull && inputField.value) {
+				if(pushBeforePull.includes(labelText) && inputField.value) {
 					var formALabel = getFormALabelByFormBLabel(labelText, labels);
 					var responseData = {
 							hasFormBField: true,
