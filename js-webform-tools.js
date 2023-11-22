@@ -34,13 +34,6 @@ function getSelectValueByLabel(options) {
 	if (debug) {console.log('Label not found:', labelText)};
 }
 
-function setFieldValue(field, value) {
-	field.focus({ preventScroll: true })
-	document.execCommand('selectAll',false,null)
-	document.execCommand('insertText',false,value)
-	field.blur()
-}
-
 function getInputByLabel(options) {
 	const {labelText = '',
 	debug = false} = options;
@@ -57,6 +50,27 @@ function getInputByLabel(options) {
 		}
 	} else {
 		if (debug) {console.log('Label not found:', labelText)};
+	}
+}
+
+function setFieldValue(field, value) {
+	field.focus({ preventScroll: true })
+	document.execCommand('selectAll',false,null)
+	document.execCommand('insertText',false,value)
+	field.blur()
+}
+
+function clearFieldValue(field) {
+	field.focus({ preventScroll: true })
+	document.execCommand('selectAll',false,null)
+	document.execCommand('delete',false,null)
+	field.blur()
+}
+
+function clearFieldsByLabel(labels) {
+	for (const label of labels) {
+		var field = getInputByLabel({labelText : label});
+		clearFieldValue(field);
 	}
 }
 
