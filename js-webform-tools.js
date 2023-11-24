@@ -310,7 +310,7 @@ function initiateContainerSyncing(options) {
 								}
 							});
                         } else if (jsonMessage && jsonMessage.hasFormBField) {
-							if (debug) {console.log('Received valid JSON message from Form A:', jsonMessage)};
+							if (debug) {console.log('Received valid JSON message from Form B:', jsonMessage)};
 
 							// Extract the data from the JSON message
 							var labelText = jsonMessage.labelText;
@@ -328,10 +328,7 @@ function initiateContainerSyncing(options) {
 									if (debug) {console.log('Frame A just filled in the field: ' + jsonMessage.value)};
 								}
 							}
-						} else {
-                            // Handle other messages from Form B
-                        }
-						else if (jsonMessage && jsonMessage.onSubmit) {
+						} else if (jsonMessage && jsonMessage.onSubmit) {
 							updateAfterSubmit();
 						}
                     } catch (error) {
