@@ -103,6 +103,157 @@ function getFormALabelByFormBLabel(formBLabel, labels) {
     return null;
 }
 
+function getFormALabels(labels) {
+    // Assuming [fields] is defined in the global scope
+    const formALabels = [];
+
+    for (const label of labels) {
+        if (label.formA && !formALabels.includes(label.formA)) {
+            formALabels.push(label.formA);
+        }
+    }
+    return formALabels;
+}
+
+function isValidJSON(str) {
+    try {
+        JSON.parse(str);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function hideFields(fieldLabels) {
+	try {
+		fieldLabels.forEach(function(labelText) {
+			var inputField = getInputByLabel({labelText: labelText});
+			if (inputField) {
+				inputField.parentNode.parentNode.parentNode.style.display = 'none';
+			}
+		});
+	} catch (error) {
+	    console.error('Error handling:', error);
+    }
+}
+
+// Function to load a script from a given URL
+function loadScript(url) {
+	return new Promise((resolve, reject) => {
+		const script = document.createElement('script');
+		script.src = url;
+		script.onload = () => {
+			console.log('Script loaded successfully: ' + url);
+			resolve();
+		};
+		script.onerror = () => {
+			console.error('Script failed to load: ' + url);
+			reject();
+		};
+		document.head.appendChild(script);
+	});
+}
+
+function disableAutocomplete() {
+    // Get all input elements on the page
+    const inputElements = document.querySelectorAll('input');
+
+    // Loop through each input element and set autocomplete to off and add data-lpignore attribute
+    inputElements.forEach(input => {
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('data-lpignore', 'true');
+//		input.readOnly = true;
+//		input.onfocus = function(){this.removeAttribute('readonly');};
+//		input.onblur = function(){this.setAttribute('readonly', true);};
+		
+    });
+}
+
+function fetchSubmitButton() {
+	var buttons = document.querySelectorAll('button');
+	// Iterate through each button
+	buttons.forEach(function(button) {
+		// Check if the button contains a div
+		var div = button.querySelector('div');
+
+		if (div) {
+			// Check if the div contains a span with the text Submit
+			var span = div.querySelector('span');
+
+			if (span && span.textContent.trim() === 'Submit') {
+				// Remove the button
+				return button;
+			}
+		}
+	});
+	return null;
+}
+
+function removeSubmitButton() {
+	fetchSubmitButton().remove();
+}
+
+function buildQueryString(json) {
+    return Object.keys(json)
+        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(json[key])}`)
+        .join('&');
+}
+
+function buildQueryStringByLabels(labels) {
+    var json = {}
+	for (const label of labels) {
+		var inputValue = getInputValueByLabel({'labelText':label});
+        if (inputValue) {
+            json[label] = inputValue;
+        }
+    }
+	return buildQueryString(json);
+}
+
+function parseQueryString() {
+		const queryString = window.location.search.substring(1);
+		const params = new URLSearchParams(queryString);
+		const result = {};
+
+		for (const [key, value] of params) {
+			result[key] = decodeURIComponent(value);
+		}
+
+		return result;
+}
+
+function populateValuesFromQueryString(labels) {
+	var parsedParams = parseQueryString();
+	var interactFieldId = 0;
+	var newEvent = new Event('input', { bubbles: true });
+	var changeEvent = new Event('change', { bubbles: true });
+	for (const label of labels) {
+	    if (parsedParams.hasOwnProperty(label) && parsedParams[label]) {	     
+			var inputField = getInputByLabel({labelText: label});
+			setFieldValue(inputField, parsedParams[label]);
+		}
+	}
+}
+
+function updateAfterSubmit() {
+	document.querySelector('.pv4').innerHTML = `
+    <div class='min-h-100 w-100 flex flex-column items-center justify-center bg-boost-secondary-05 pv4'>
+        <div data-cy='custom-form-submit-success' class='w-100 flex flex-column center mw7 justify-between'>
+            <div class='pa4 tc bg-boost-success boost-white b br3'>
+                Thank you! Your response has been successfully submitted.
+                <br>
+                <a href='javascript:void(0);' onclick='window.location.href = window.location.href;' style='color: blue; text-decoration: underline;'>
+                    Click here to start a new form.
+                </a>
+            </div>
+        </div>
+        <div class='bg-boost-white br-pill pa3 mt3 overflow-hidden'>
+            <img alt='Logo' class='' src='https://boost-static-assets.s3.amazonaws.com/images/logomark.svg' style='width: 32px; height: 32px;'>
+        </div>
+    </div>
+`;
+}
+
 function initiateContainerSyncing(options) {
 	const { debug = false
 	} = options;
@@ -180,6 +331,9 @@ function initiateContainerSyncing(options) {
 						} else {
                             // Handle other messages from Form B
                         }
+						else if (jsonMessage && jsonMessage.onSubmit) {
+							updateAfterSubmit();
+						}
                     } catch (error) {
                         if (debug) {console.log};('Error parsing JSON:', error);
                     }
@@ -190,27 +344,6 @@ function initiateContainerSyncing(options) {
         }
     } catch (error) {
         console.error('Error handling:', error);
-    }
-}
-
-function getFormALabels(labels) {
-    // Assuming [fields] is defined in the global scope
-    const formALabels = [];
-
-    for (const label of labels) {
-        if (label.formA && !formALabels.includes(label.formA)) {
-            formALabels.push(label.formA);
-        }
-    }
-    return formALabels;
-}
-
-function isValidJSON(str) {
-    try {
-        JSON.parse(str);
-        return true;
-    } catch (e) {
-        return false;
     }
 }
 
@@ -311,110 +444,48 @@ function initiateNestedSyncing(options) {
 	}
 }
 
-function hideFields(fieldLabels) {
-	try {
-		fieldLabels.forEach(function(labelText) {
-			var inputField = getInputByLabel({labelText: labelText});
-			if (inputField) {
-				inputField.parentNode.parentNode.parentNode.style.display = 'none';
+function initiateMessageParentOnSubmit(options) {
+	const { debug = false } = options;
+	// Target element selector
+	const targetSelector = 'div[data-cy="custom-form-submit-success"]';
+
+	// Callback function to be executed when the target element appears
+	function handleElementAppearance(mutationsList, observer) {
+		for (const mutation of mutationsList) {
+			if (mutation.type === 'childList') {
+				// Check if the target element has been added
+				const targetElement = document.querySelector(targetSelector);
+				if (targetElement) {
+					// Your code to handle the appearance of the element
+					console.log('Element with data-cy="custom-form-submit-success" appeared!');
+					
+					// Call your function when the element appears
+					try {
+						var request = {
+							'onSubmit': true
+						};
+						window.parent.postMessage(JSON.stringify(request), 'https://' + currentHostname);
+						if (debug) {console.log('Frame B: Message sent to parent: ' + JSON.stringify(request))};
+					} catch (error) {
+						console.error('Error handling:', error);
+					}
+
+					// Disconnect the observer once the element is found (optional)
+					observer.disconnect();
+				}
 			}
-		});
-	} catch (error) {
-	    console.error('Error handling:', error);
-    }
-}
-
-// Function to load a script from a given URL
-function loadScript(url) {
-	return new Promise((resolve, reject) => {
-		const script = document.createElement('script');
-		script.src = url;
-		script.onload = () => {
-			console.log('Script loaded successfully: ' + url);
-			resolve();
-		};
-		script.onerror = () => {
-			console.error('Script failed to load: ' + url);
-			reject();
-		};
-		document.head.appendChild(script);
-	});
-}
-
-function disableAutocomplete() {
-    // Get all input elements on the page
-    const inputElements = document.querySelectorAll('input');
-
-    // Loop through each input element and set autocomplete to off and add data-lpignore attribute
-    inputElements.forEach(input => {
-        input.setAttribute('autocomplete', 'off');
-        input.setAttribute('data-lpignore', 'true');
-//		input.readOnly = true;
-//		input.onfocus = function(){this.removeAttribute('readonly');};
-//		input.onblur = function(){this.setAttribute('readonly', true);};
-		
-    });
-}
-
-function removeSubmitButton() {
-	// Select all buttons
-	var buttons = document.querySelectorAll('button');
-		var fieldLabels = ['• First name', 'Last name', 'What does the caller need?'];
-	// Iterate through each button
-	buttons.forEach(function(button) {
-		// Check if the button contains a div
-		var div = button.querySelector('div');
-
-		if (div) {
-			// Check if the div contains a span with the text Submit
-			var span = div.querySelector('span');
-
-			if (span && span.textContent.trim() === 'Submit') {
-				// Remove the button
-				button.remove();
-			}
-		}
-	});
-}
-
-function buildQueryString(json) {
-    return Object.keys(json)
-        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(json[key])}`)
-        .join('&');
-}
-
-function buildQueryStringByLabels(labels) {
-    var json = {}
-	for (const label of labels) {
-		var inputValue = getInputValueByLabel({'labelText':label});
-        if (inputValue) {
-            json[label] = inputValue;
-        }
-    }
-	return buildQueryString(json);
-}
-
-function parseQueryString() {
-		const queryString = window.location.search.substring(1);
-		const params = new URLSearchParams(queryString);
-		const result = {};
-
-		for (const [key, value] of params) {
-			result[key] = decodeURIComponent(value);
-		}
-
-		return result;
-}
-
-function populateValuesFromQueryString(labels) {
-	var parsedParams = parseQueryString();
-	var interactFieldId = 0;
-	var newEvent = new Event('input', { bubbles: true });
-	var changeEvent = new Event('change', { bubbles: true });
-	for (const label of labels) {
-	    if (parsedParams.hasOwnProperty(label) && parsedParams[label]) {	     
-			var inputField = getInputByLabel({labelText: label});
-			setFieldValue(inputField, parsedParams[label]);
 		}
 	}
+
+	// Create a new MutationObserver with the callback function
+	const observer = new MutationObserver(handleElementAppearance);
+
+	// Options for the observer (we want to observe changes to the entire document)
+	const observerOptions = {
+		childList: true,
+		subtree: true,
+	};
+
+	// Start observing the document
+	observer.observe(document, observerOptions);
 }
