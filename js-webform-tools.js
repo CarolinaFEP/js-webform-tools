@@ -171,6 +171,7 @@ function disableAutocomplete() {
 
 function fetchSubmitButton() {
 	var buttons = document.querySelectorAll('button');
+	var button_el = null;
 	// Iterate through each button
 	buttons.forEach(function(button) {
 		// Check if the button contains a div
@@ -182,11 +183,11 @@ function fetchSubmitButton() {
 
 			if (span && span.textContent.trim() === 'Submit') {
 				// Remove the button
-				return button;
+				button_el = button;
 			}
 		}
 	});
-	return null;
+	return button_el;
 }
 
 function removeSubmitButton() {
