@@ -444,6 +444,8 @@ function initiateNestedSyncing(options) {
 
 function initiateMessageParentOnSubmit(options) {
 	const { debug = false } = options;
+	const currentHostname = window.location.hostname;
+
 	// Target element selector
 	const targetSelector = 'div[data-cy="custom-form-submit-success"]';
 
