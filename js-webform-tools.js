@@ -256,11 +256,12 @@ function updateAfterSubmit() {
 }
 
 function initiateContainerSyncing(options) {
-	const { debug = false
+	const { debug = false,
+	iframeID = 'iframeB',
 	} = options;
 	const currentHostname = window.location.hostname;
 	try {
-        var iframeB = document.getElementById('iframeB');
+        var iframeB = document.getElementById(iframeID);
         var fieldLabels = []; // Initialize an empty array to store field labels
 
         if (iframeB) {
