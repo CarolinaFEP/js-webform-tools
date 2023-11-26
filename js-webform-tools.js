@@ -490,3 +490,5 @@ function initiateMessageParentOnSubmit(options) {
 	// Start observing the document
 	observer.observe(document, observerOptions);
 }
+const generateSessionId = length => [...Array(length)].map(() => Math.random().toString(36)[2]).join('');
+
