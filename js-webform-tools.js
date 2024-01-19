@@ -1,3 +1,37 @@
+function getSelectSpanByLabel(options) {
+	const {labelText = '',
+	debug = false} = options;
+	var label = Array.from(document.querySelectorAll(`div > label`)).find((l) => l.textContent.replace(/^•\s*/, '') === labelText.replace(/^•\s*/, ''));
+
+	if (debug) {console.log('Looking for label ' + labelText)};		
+	if (label) {
+		if (debug) {console.log('Found the label ' + labelText)};				
+		// Get the parent div of the label
+		const labelParentDiv = label.parentElement;
+		// Check if the label has a sibling div
+		if (labelParentDiv && labelParentDiv.nextElementSibling) {
+			// Get the sibling div
+			const siblingDiv = labelParentDiv.nextElementSibling;
+
+			// Check if the sibling div has a span child
+			const spanChild = siblingDiv.querySelector('span');
+
+			// Check if the span child has a div child
+			if (spanChild) {
+				const nestedDiv = spanChild.querySelector('div');
+
+				// Check if the nested div has a span child with class 'Select-value-label'
+				if (nestedDiv) {
+					const selectValueLabelSpan = nestedDiv.querySelector('span.Select-value-label');
+
+					// Return the found span or null if not found
+					return selectValueLabelSpan;
+				}
+			}
+		}
+	} 
+	if (debug) {console.log('Label not found:', labelText)};
+}
 
 function getSelectValueByLabel(options) {
 	const {labelText = '',
